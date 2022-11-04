@@ -1,3 +1,7 @@
 .vscode
-output
 **/__pycache__
+
+sbatch_scripts
+logs
+data
+output

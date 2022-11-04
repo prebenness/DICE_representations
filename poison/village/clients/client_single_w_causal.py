@@ -8,7 +8,6 @@ from collections import defaultdict
 from ..utils import set_random_seed
 from ..consts import BENCHMARK
 import pdb
-import apex.amp as amp
 
 torch.backends.cudnn.benchmark = BENCHMARK
 

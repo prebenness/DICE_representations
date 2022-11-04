@@ -50,6 +50,10 @@ python main.py --cfg scripts/cifar10/eval.yaml --prefix your/exp/name
 
 Note that in `eval.yaml`, you need to specify the model path to the variable ``PRETRAINED_PATH`` for loading model parameters. Your are welcome to try your own configurations. If you find a better yaml configuration, please let us know by raising an issue or a PR and we will update the benchmark!
 
+### Represenation computation
+```bash
+python main.py --cfg scripts/cifar10/representations.yaml --prefix your/exp/name
+```
 
 ## Pretrained Models
 

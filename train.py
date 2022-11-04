@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn import DataParallel
 
-import apex.amp as amp
 from utils.config import cfg
 from attacks import attack_pgd, attack_pgd_on_both, attack_pgd_on_conf
 

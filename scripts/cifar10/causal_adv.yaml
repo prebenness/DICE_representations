@@ -3,30 +3,30 @@ data_root: ./data
 batch_size: 128
 test_batch_size: 128
 
-# hyper parameters for training 
-epochs: 110
+# Hyperparameters for training
+epochs: 1             # Originally 110
 opt_level: O1
 lr: 0.1
 lr_mode: 'piecewise'
 weight_decay: 0.0005
 
-# model backbone
+# Model and backbone
 ARCH: causal_v0
-BACK_ARCH: WideResNet
+BACK_ARCH: ResNet18
 
-# hyper parameters for MODEL
+# Model hyperparameters
 MODEL:
   X_S_WHOLE: True
   ATTN_SIZE: 20
   CONF_SET_SIZE: 20
   CONF_BUFFER_SIZE: 10000
   CONF_MODE: input
-  HID_CHANNELS: 640
+  HID_CHANNELS: 512   # ResNet18
   CONF_CLEAN: True
   CONF_ADV: True
   CONF_ADV_ATT: True
 
-# hyper-parameters for ATTACK
+# Attack hyperparameters
 ATTACK:
   LOSS_TYPE: untar # choices=['tar', 'untar', 'tar_adap', ...]
   CONFOUNDING_WAY: mc # for ``tar'' loss_type 
@@ -35,7 +35,7 @@ ATTACK:
   ALPHA: 2.
   GAMMA: 0.5 # for ``tar_adap'' loss_type 
 
-# hyper-parameters for Training
+# Training hyperparameters
 TRAIN: 
   MODE: causal_adv
   LR_DECAY: 0.10
@@ -48,11 +48,11 @@ TRAIN:
   GRAD_MASK_WAY: hard
   GRAD_POOLING: max
   GRAD_ATT_R: 0.6
-  # disable it during inference
-  BNeval: True
+  BNeval: True    # Disable during inference
 
 DATASET:
   MODE: clean
+  NAME: 'CIFAR_10'
+  NUM_CLASSES: 10
 
-# enable it during inference
-EVAL: False
+EVAL: False       # Enable during inference
