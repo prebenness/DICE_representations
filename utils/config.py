@@ -56,6 +56,7 @@ __C.out_dir = 'results/'
 __C.EVAL = False
 __C.EVAL_MASK = False
 __C.EVAL_BLACK = False
+__C.REPR = False
 
 __C.DATASET_NAME = 'CIFAR_10'
 # most ``PATH'' can be automatically initialized without being specified

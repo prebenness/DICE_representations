@@ -9,6 +9,7 @@ from datetime import datetime
 from pathlib import Path
 from tensorboardX import SummaryWriter
 
+from representations import representations
 from utils.parse_args import parse_args
 from utils.print_easydict import print_easydict
 from utils.dup_stdout_manager import DupStdoutFileManager
@@ -163,6 +164,8 @@ if __name__ == '__main__':
         print_easydict(cfg)
         if cfg.EVAL:
             evaluation(model)
+        elif cfg.REPR:
+            representations(model, train_loader, test_loader)
         else:
             main(model, device, train_loader,
                 optimizer, scheduler, tfboardwriter,
