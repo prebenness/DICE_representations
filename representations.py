@@ -15,6 +15,10 @@ def representations(model, train_loader, test_loader):
     if isinstance(model, DataParallel):
         model = model.module    
 
+    model_path = os.path.normpath(cfg.PRETRAINED_PATH)
+    model_dir = os.path.join(*model_path.split(os.sep)[:-2])
+    outpath = os.path.join(model_dir, 'representations')
+
     split_dict = { 'train': train_loader, 'test': test_loader }
     for split_name, loader in split_dict.items():
 
@@ -42,11 +46,6 @@ def representations(model, train_loader, test_loader):
         images = torch.cat(images, 0).detach().cpu().numpy()
         style = torch.cat(style, 0).detach().cpu().numpy()
         content = torch.cat(content, 0).detach().cpu().numpy()
-
-        model_path = os.path.normpath(cfg.PRETRAINED_PATH)
-        model_name = model_path.split(os.sep)[-3]
-
-        outpath = os.path.join('output', 'representations', f'{cfg.DATASET.NAME}-{model_name}')
 
         os.makedirs(outpath, exist_ok=True)
         np.savez(os.path.join(outpath, f'content_{split_name}.npz'), content)

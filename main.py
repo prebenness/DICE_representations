@@ -18,7 +18,7 @@ from utils.model_sl import load_model, save_model
 
 args = parse_args('Beginning.')
 
-from util_func import StatLogger, set_seed, transform_train, transform_test, make_model, transform_train_norm, transform_test_norm
+from util_func import StatLogger, set_seed, make_model, make_transform
 from train import train, train_causal_poison, train_causal_adv, train_causal_attack, train_adv, eval_adv
 
 def main(model, device, train_loader, optimizer, scheduler, tfboardwriter, loss_logger, acc_logger):
@@ -99,14 +99,17 @@ if __name__ == '__main__':
     device = torch.device("cuda" if use_cuda else "cpu")
     kwargs = {'num_workers': 8, 'pin_memory': True} if use_cuda else {}
 
-    if cfg.DATASET.NORM:
-        transform_train = transform_train_norm
-        transform_test = transform_test_norm
+    transform_train = make_transform(train=True)
+    transform_test = make_transform(train=False)
 
     if cfg.DATASET.NAME == 'CIFAR_100':
         data_set = datasets.CIFAR100(root=cfg.data_root, train=True, download=True, transform=transform_train)
-    else:
+    elif cfg.DATASET.NAME == 'CIFAR_10':
         data_set = datasets.CIFAR10(root=cfg.data_root, train=True, download=True, transform=transform_train)
+    elif cfg.DATASET.NAME == 'MNIST':
+        data_set = datasets.MNIST(root=cfg.data_root, train=True, download=True, transform=transform_train)
+    else:
+        raise NotImplementedError(f'Dataset {cfg.DATASET.NAME} not supported')    
 
     train_set, val_set = random_split(data_set, [len(data_set) - cfg.val_num_examples, cfg.val_num_examples],
                                     generator=torch.Generator().manual_seed(cfg.seed))
@@ -115,8 +118,12 @@ if __name__ == '__main__':
 
     if cfg.DATASET.NAME == 'CIFAR_100':
         testset = datasets.CIFAR100(root=cfg.test_root, train=False, download=True, transform=transform_test)
-    else:
+    elif cfg.DATASET.NAME == 'CIFAR_10':
         testset = datasets.CIFAR10(root=cfg.test_root, train=False, download=True, transform=transform_test)
+    elif cfg.DATASET.NAME == 'MNIST':
+        testset = datasets.MNIST(root=cfg.data_root, train=False, download=True, transform=transform_test)
+    else:
+        raise NotImplementedError(f'Dataset {cfg.DATASET.NAME} not supported')
     test_loader = DataLoader(testset, batch_size=cfg.test_batch_size, shuffle=False, **kwargs)
 
     model = make_model(cfg.ARCH)

@@ -1,0 +1,65 @@
+data_root: ./data
+
+batch_size: 128
+test_batch_size: 128
+
+# Hyperparameters for training
+epochs: 110           # Originally 110
+opt_level: O1
+lr: 0.1
+lr_mode: 'piecewise'
+weight_decay: 0.0005
+SAVE_EPOCH: 50       # When to start checkpointing model 
+SAVE_FREQ: 10        # How often to checkpoint model
+
+# Model and backbone
+ARCH: causal_v0
+BACK_ARCH: ResNet18
+
+# Model hyperparameters
+MODEL:
+  X_S_WHOLE: True
+  ATTN_SIZE: 20
+  CONF_SET_SIZE: 20
+  CONF_BUFFER_SIZE: 10000
+  CONF_MODE: input
+  HID_CHANNELS: 512   # ResNet18
+  CONF_CLEAN: True
+  CONF_ADV: True
+  CONF_ADV_ATT: True
+
+# Attack hyperparameters
+ATTACK:
+  LOSS_TYPE: untar # choices=['tar', 'untar', 'tar_adap', ...]
+  CONFOUNDING_WAY: mc # for ``tar'' loss_type 
+  STEP: 10
+  EPSILON: 8.
+  ALPHA: 2.
+  GAMMA: 0.5 # for ``tar_adap'' loss_type 
+
+# Training hyperparameters
+TRAIN: 
+  MODE: causal_adv
+  LR_DECAY: 0.10
+  LR_STEP: 
+    - 100
+    - 105
+  CAUSAL_REG: 4.
+  CAUSAL_SURRO: adv
+  GRAD_PRE_WAY: std
+  GRAD_MASK_WAY: hard
+  GRAD_POOLING: max
+  GRAD_ATT_R: 0.6
+  BNeval: True    # Disable during inference
+
+DATASET:
+  MODE: clean
+  NAME: 'MNIST'
+  NUM_CLASSES: 10
+  SIZE_H: 28
+  SIZE_W: 28
+  NUM_CHANNEL: 1
+  NORM: False
+
+EVAL: False       # Enable during inference
+REPR: False       # Compute representations - requires pre-trained model

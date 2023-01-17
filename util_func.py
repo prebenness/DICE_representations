@@ -24,7 +24,28 @@ def normalize(X):
 def clamp(X, lower_limit, upper_limit):
     return torch.max(torch.min(X, upper_limit), lower_limit)
 
-transform_train = transforms.Compose([
+
+def make_transform(train=True):
+    norm = cfg.DATASET.NORM
+
+    transform_list = [ transforms.ToTensor() ]
+
+    if train:
+        transform_list = [
+            transforms.RandomCrop(cfg.DATASET.SIZE_H, padding=4),
+            transforms.RandomHorizontalFlip(),
+        ]  + transform_list
+    
+    if norm:
+        transform_list = transform_list + [
+            transforms.Normalize(cfg.DATASET.MEAN, cfg.DATASET.STD)
+        ]
+
+    return transforms.Compose(
+        transform_list
+    )
+
+""" transform_train = transforms.Compose([
     transforms.RandomCrop(32, padding=4),
     transforms.RandomHorizontalFlip(),
     transforms.ToTensor(),
@@ -44,7 +65,7 @@ transform_train_norm = transforms.Compose([
 transform_test_norm = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize(cfg.cifar10_mean, cfg.cifar10_std)
-])
+]) """
 
 def set_seed():
     torch.manual_seed(cfg.seed)
@@ -58,7 +79,7 @@ def make_model(arch):
     elif arch == 'VGG19':
         model = VGG19()
     elif arch == 'ResNet18':
-        model = ResNet18()
+        model = ResNet18(num_channels=cfg.DATASET.NUM_CHANNEL)
     elif arch == 'ResNet34':
         model = ResNet34()
     elif arch == 'ResNet50':

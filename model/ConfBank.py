@@ -140,5 +140,6 @@ class ConfounderBank(nn.Module):
         x_vs = self.confounder_queue[selected]
         x_vs = tensor2np(x_vs)
         for j in range(num):
-            img = x_vs[j]
-            Image.fromarray(img, mode='RGB').save(os.path.join(dir, f"{j}.png"))
+            img = x_vs[j].squeeze()
+            mode = 'RGB' if cfg.DATASET.NUM_CHANNEL == 3 else 'L'
+            Image.fromarray(img, mode=mode).save(os.path.join(dir, f"{j}.png"))

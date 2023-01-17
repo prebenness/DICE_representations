@@ -97,9 +97,9 @@ def parse_args(description):
             exp_name = '{}_debug'.format(args.prefix)
 
     if args.datetime is None:
-        now_day = datetime.now().strftime('%Y-%m-%d')
+        now_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
-    outp_path = os.path.join('output', now_day, exp_name)
+    outp_path = os.path.join('output', now_time, exp_name)
     save_path = os.path.join(outp_path, 'params')
     stat_path = os.path.join(outp_path, 'stats')
     cfg_from_list(['OUTPUT_PATH', outp_path])
