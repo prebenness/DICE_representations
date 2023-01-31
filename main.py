@@ -49,6 +49,9 @@ def main(model, device, train_loader, optimizer, scheduler, tfboardwriter, loss_
 
         # save checkpoints
         if epoch >= cfg.SAVE_EPOCH and epoch % cfg.SAVE_FREQ == 0:
+            print(f'Evaluating model at epoch {epoch}')
+            evaluation(model)
+
             save_model(model, os.path.join(cfg.SAVE_PATH, 'epoch{}.pt'.format(epoch)))
             if isinstance(optimizer, list):
                 opt_names = ['causal', 'conf']
@@ -177,3 +180,5 @@ if __name__ == '__main__':
             main(model, device, train_loader,
                 optimizer, scheduler, tfboardwriter,
                 loss_logger, acc_logger)
+            print('Evaluating final model')
+            evaluation(model)

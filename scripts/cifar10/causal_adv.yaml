@@ -4,13 +4,13 @@ batch_size: 128
 test_batch_size: 128
 
 # Hyperparameters for training
-epochs: 110           # Originally 110
+epochs: 200           # Originally 110
 opt_level: O1
 lr: 0.1
 lr_mode: 'piecewise'
 weight_decay: 0.0005
-SAVE_EPOCH: 50       # When to start checkpointing model 
-SAVE_FREQ: 10        # How often to checkpoint model
+SAVE_EPOCH: 10        # When to start checkpointing model 
+SAVE_FREQ: 5          # How often to checkpoint model
 
 # Model and backbone
 ARCH: causal_v0
