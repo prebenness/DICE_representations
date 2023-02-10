@@ -80,8 +80,10 @@ def main(model, device, train_loader, optimizer, scheduler, tfboardwriter, loss_
     acc_logger.save()
 
 def evaluation(model=None):
-    eval_adv(model, device, test_loader, 0, tfboardwriter, 'Test', att='untar')
-    eval_adv(model, device, test_loader, 0, tfboardwriter, 'Test', att='cw')
+    loss_dict, acc_dict = eval_adv(model, device, test_loader, 0, tfboardwriter, 'Test', att=cfg.ATTACK.LOSS_TYPE)
+    #eval_adv(model, device, test_loader, 0, tfboardwriter, 'Test', att='cw')
+
+    return loss_dict, acc_dict
 
 
 if __name__ == '__main__':
