@@ -175,7 +175,13 @@ if __name__ == '__main__':
     with DupStdoutFileManager(str(Path(cfg.OUTPUT_PATH) / (now_time + '.log'))) as _:
         print_easydict(cfg)
         if cfg.EVAL:
-            evaluation(model)
+            loss_dict, acc_dict = evaluation(model)
+            model_dir, model_name = os.path.split(model_path)
+            log_name = '.'.join([model_name.split('.')[0], 'txt'])
+            log_file = os.path.join(model_dir, log_name)
+            with open(log_file, 'w') as w:
+                w.write(f'Test: Clean acc: {acc_dict["clean acc"]} PGD40 acc: {acc_dict["untar robust acc"]}')
+            
         elif cfg.REPR:
             representations(model, train_loader, test_loader)
         else:

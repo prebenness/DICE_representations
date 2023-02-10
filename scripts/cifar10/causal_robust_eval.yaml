@@ -37,7 +37,7 @@ ATTACK:
   # Eval
   EVAL_STEP: 40
   EVAL_EPSILON: 8.
-  EVAL_ALPHA: 8.
+  EVAL_ALPHA: 4.
   GAMMA: 0.5 # for ``tar_adap'' loss_type 
 
 # Training hyperparameters
