@@ -183,7 +183,7 @@ if __name__ == '__main__':
                 w.write(f'Test: Clean acc: {acc_dict["clean acc"]} PGD40 acc: {acc_dict["untar robust acc"]}')
             
         elif cfg.REPR:
-            representations(model, train_loader, test_loader)
+            representations(model, model_path, train_loader, test_loader)
         else:
             main(model, device, train_loader,
                 optimizer, scheduler, tfboardwriter,

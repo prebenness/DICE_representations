@@ -9,7 +9,7 @@ def parse_args(description):
     parser.add_argument('--cfg', '--config', dest='cfg_file', action='append',
                         help='an optional config file', default=None, type=str)
     parser.add_argument('--arch', default=None, type=str)
-    parser.add_argument('--model_path', default=None, type=str)
+    parser.add_argument('--pretrained_path', default=None, type=str)
     parser.add_argument('--clean_data_path', default=None, type=str)
     parser.add_argument('--batch', dest='batch_size',
                         help='batch size', default=None, type=int)
@@ -65,8 +65,8 @@ def parse_args(description):
     if args.eps is not None:
         cfg_from_list(['ATTACK.EPSILON', args.eps])
         cfg_from_list(['ATTACK.EVAL_EPSILON', args.eps])
-    if args.model_path is not None:
-        cfg_from_list(['MODEL_PATH', args.model_path])
+    if args.pretrained_path is not None:
+        cfg_from_list(['PRETRAINED_PATH', args.pretrained_path])
     if args.mode is not None:
         cfg_from_list(['TRAIN.MODE', args.mode])
 

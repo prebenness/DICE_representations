@@ -7,7 +7,7 @@ from utils.config import cfg
 from torch.nn import DataParallel
 
 
-def representations(model, train_loader, test_loader):
+def representations(model, model_path, train_loader, test_loader):
     device = torch.device("cuda")
     
     model.train()
@@ -15,9 +15,8 @@ def representations(model, train_loader, test_loader):
     if isinstance(model, DataParallel):
         model = model.module    
 
-    model_path = os.path.normpath(cfg.PRETRAINED_PATH)
-    model_dir = os.path.join(*model_path.split(os.sep)[:-2])
-    outpath = os.path.join(model_dir, 'representations')
+    model_dir, model_name = os.path.split(model_path)
+    out_dir = os.path.join(model_dir, f'{model_name.split(".")[0]}-representations')
 
     split_dict = { 'train': train_loader, 'test': test_loader }
     for split_name, loader in split_dict.items():
@@ -47,12 +46,12 @@ def representations(model, train_loader, test_loader):
         style = torch.cat(style, 0).detach().cpu().numpy()
         content = torch.cat(content, 0).detach().cpu().numpy()
 
-        os.makedirs(outpath, exist_ok=True)
-        np.savez(os.path.join(outpath, f'content_{split_name}.npz'), content)
-        np.savez(os.path.join(outpath, f'images_{split_name}.npz'), images)
-        np.savez(os.path.join(outpath, f'style_{split_name}.npz'), style)
+        os.makedirs(out_dir, exist_ok=True)
+        np.savez(os.path.join(out_dir, f'content_{split_name}.npz'), content)
+        np.savez(os.path.join(out_dir, f'images_{split_name}.npz'), images)
+        np.savez(os.path.join(out_dir, f'style_{split_name}.npz'), style)
 
-    print(f'Representations computed and stored under {outpath}')
+    print(f'Representations computed and stored under {out_dir}')
 
 if __name__ == '__main__':
-  representations()
+    representations()
