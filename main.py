@@ -1,5 +1,6 @@
 import os
 import torch
+import torchattacks
 import xlwt
 from torch.nn import DataParallel
 import torch.optim as optim
@@ -15,6 +16,7 @@ from utils.print_easydict import print_easydict
 from utils.dup_stdout_manager import DupStdoutFileManager
 from utils.config import cfg
 from utils.model_sl import load_model, save_model
+from utils.dummy_attack import DummyAttack
 
 args = parse_args('Beginning.')
 
@@ -79,11 +81,72 @@ def main(model, device, train_loader, optimizer, scheduler, tfboardwriter, loss_
     loss_logger.save()
     acc_logger.save()
 
+
 def evaluation(model=None):
     loss_dict, acc_dict = eval_adv(model, device, test_loader, 0, tfboardwriter, 'Test', att=cfg.ATTACK.LOSS_TYPE)
-    #eval_adv(model, device, test_loader, 0, tfboardwriter, 'Test', att='cw')
 
-    return loss_dict, acc_dict
+
+def test_robustness(model, data_loader, device):
+    attack_factories = {
+        'dummy_attacker': DummyAttack,
+        'pgd20_linf': lambda m: torchattacks.PGD(m, eps=8/255, alpha=1/255, steps=20, random_start=True),
+        'pgd40_linf': lambda m: torchattacks.PGD(m, eps=8/255, alpha=1/255, steps=40, random_start=True),
+        'pgd20_l2': lambda m: torchattacks.PGDL2(m, eps=1.0, alpha=0.2, steps=20, random_start=True),
+        'pgd40_l2': lambda m: torchattacks.PGDL2(m, eps=1.0, alpha=0.2, steps=40, random_start=True),
+        'fgsm_linf': lambda m: torchattacks.FGSM(m, eps=8/255),
+        'cw20_l2': lambda m: torchattacks.CW(m, c=1, kappa=0, steps=20),
+        'cw40_l2': lambda m: torchattacks.CW(m, c=1, kappa=0, steps=20), 
+    }
+
+    results = {}
+    for attack_name, attack_factory in attack_factories.items():
+        print(f'Testing on {attack_name}')
+        clean_acc, adv_acc = test_attack(
+            model, attack_factory=attack_factory, test_loader=data_loader, device=device
+        )
+        results[attack_name] = (clean_acc, adv_acc)
+
+    model_dir, model_name = os.path.split(model_path)
+    log_name = '.'.join([model_name.split('.')[0], 'txt'])
+    log_file = os.path.join(model_dir, log_name)
+
+    res_text = '\n'.join(
+        [ f'{attack_name} clean acc: {v[0]:10.8f} adv acc: {v[1]:10.8f}' for attack_name, v in results ]
+    )
+    with open(log_file, 'w') as w:
+        w.write(res_text)
+
+    print(res_text)
+
+
+def test_attack(model, attack_factory, test_loader, device):
+    num_corr, num_corr_adv, num_tot = 0, 0, 0
+    for (x, y) in test_loader:
+        x = x.to(device)
+        y = y.to(device)
+
+        # Get clean test preds
+        y_pred = model(x)
+
+        # Craft adversarial samples
+        attacker = attack_factory(model)
+        x_adv = attacker(x, y)
+        y_pred_adv = model(x_adv)
+
+        num_corr += (y_pred.argmax(dim=1) == y).sum().item()
+        num_corr_adv += (y_pred_adv.argmax(dim=1) == y).sum().item()
+        num_tot += y.shape[0]
+
+        print(f'Processed {num_tot:5d} of {len(test_loader.dataset):5d} samples, current tally: Clean acc: {num_corr / num_tot:4.3f} Adv acc: {num_corr_adv / num_tot:4.3f}')
+
+    # Compute and store results
+    clean_acc = num_corr / num_tot
+    adv_acc = num_corr_adv / num_tot
+
+    res_text = f'Test completed: Clean acc: {clean_acc} Adv acc: {adv_acc}'
+    print(res_text)
+
+    return clean_acc, adv_acc
 
 
 if __name__ == '__main__':
@@ -175,12 +238,7 @@ if __name__ == '__main__':
     with DupStdoutFileManager(str(Path(cfg.OUTPUT_PATH) / (now_time + '.log'))) as _:
         print_easydict(cfg)
         if cfg.EVAL:
-            loss_dict, acc_dict = evaluation(model)
-            model_dir, model_name = os.path.split(model_path)
-            log_name = '.'.join([model_name.split('.')[0], 'txt'])
-            log_file = os.path.join(model_dir, log_name)
-            with open(log_file, 'w') as w:
-                w.write(f'Test: Clean acc: {acc_dict["clean acc"]} PGD40 acc: {acc_dict["untar robust acc"]}')
+            test_robustness(model, test_loader, device=device)
             
         elif cfg.REPR:
             representations(model, model_path, train_loader, test_loader)
