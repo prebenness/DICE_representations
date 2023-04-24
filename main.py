@@ -89,8 +89,8 @@ def evaluation(model=None):
 def test_robustness(model, data_loader, device):
     attack_factories = {
         'dummy_attacker': DummyAttack,
-        'pgd20_linf': lambda m: torchattacks.PGD(m, eps=8/255, alpha=1/255, steps=20, random_start=True),
-        'pgd40_linf': lambda m: torchattacks.PGD(m, eps=8/255, alpha=1/255, steps=40, random_start=True),
+        'pgd20_linf': lambda m: torchattacks.PGD(m, eps=8/255, alpha=2/255, steps=20, random_start=True),
+        'pgd40_linf': lambda m: torchattacks.PGD(m, eps=8/255, alpha=4/255, steps=40, random_start=True),
         'pgd20_l2': lambda m: torchattacks.PGDL2(m, eps=1.0, alpha=0.2, steps=20, random_start=True),
         'pgd40_l2': lambda m: torchattacks.PGDL2(m, eps=1.0, alpha=0.2, steps=40, random_start=True),
         'fgsm_linf': lambda m: torchattacks.FGSM(m, eps=8/255),
