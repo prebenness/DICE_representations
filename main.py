@@ -111,7 +111,7 @@ def test_robustness(model, data_loader, device):
     log_file = os.path.join(model_dir, log_name)
 
     res_text = '\n'.join(
-        [ f'{attack_name} clean acc: {v[0]:10.8f} adv acc: {v[1]:10.8f}' for attack_name, v in results ]
+        [ f'{attack_name} clean acc: {v[0]:10.8f} adv acc: {v[1]:10.8f}' for attack_name, v in results.items() ]
     )
     with open(log_file, 'w') as w:
         w.write(res_text)
