@@ -239,6 +239,7 @@ if __name__ == '__main__':
         print_easydict(cfg)
         if cfg.EVAL:
             test_robustness(model, test_loader, device=device)
+            evaluation(model)
             
         elif cfg.REPR:
             representations(model, model_path, train_loader, test_loader)
