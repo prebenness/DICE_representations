@@ -4,8 +4,6 @@ import torchattacks
 import xlwt
 from torch.nn import DataParallel
 import torch.optim as optim
-from torchvision import datasets
-from torch.utils.data import DataLoader, random_split
 from datetime import datetime
 from pathlib import Path
 from tensorboardX import SummaryWriter
@@ -20,12 +18,13 @@ from utils.dummy_attack import DummyAttack
 
 args = parse_args('Beginning.')
 
-from util_func import StatLogger, set_seed, make_model, make_transform
+from util_func import StatLogger, set_seed, make_model, get_data
 from train import train, train_causal_poison, train_causal_adv, train_causal_attack, train_adv, eval_adv
 
 def main(model, device, train_loader, optimizer, scheduler, tfboardwriter, loss_logger, acc_logger):
     for epoch in range(cfg.start_epoch, cfg.epochs + 1):
         model.train()
+        print('Starting training')
         if cfg.TRAIN.MODE == 'causal_poison':
             lossdict, accdict = train_causal_poison(model, device, train_loader, optimizer[0], optimizer[1], epoch, tfboardwriter)
         elif cfg.TRAIN.MODE == 'causal_adv':
@@ -167,32 +166,7 @@ if __name__ == '__main__':
     device = torch.device("cuda" if use_cuda else "cpu")
     kwargs = {'num_workers': 8, 'pin_memory': True} if use_cuda else {}
 
-    transform_train = make_transform(train=True)
-    transform_test = make_transform(train=False)
-
-    if cfg.DATASET.NAME == 'CIFAR_100':
-        data_set = datasets.CIFAR100(root=cfg.data_root, train=True, download=True, transform=transform_train)
-    elif cfg.DATASET.NAME == 'CIFAR_10':
-        data_set = datasets.CIFAR10(root=cfg.data_root, train=True, download=True, transform=transform_train)
-    elif cfg.DATASET.NAME == 'MNIST':
-        data_set = datasets.MNIST(root=cfg.data_root, train=True, download=True, transform=transform_train)
-    else:
-        raise NotImplementedError(f'Dataset {cfg.DATASET.NAME} not supported')    
-
-    train_set, val_set = random_split(data_set, [len(data_set) - cfg.val_num_examples, cfg.val_num_examples],
-                                    generator=torch.Generator().manual_seed(cfg.seed))
-    train_loader = DataLoader(train_set, batch_size=cfg.batch_size, shuffle=True, **kwargs)
-    val_loader = DataLoader(val_set, batch_size=cfg.batch_size, shuffle=False, **kwargs)
-
-    if cfg.DATASET.NAME == 'CIFAR_100':
-        testset = datasets.CIFAR100(root=cfg.test_root, train=False, download=True, transform=transform_test)
-    elif cfg.DATASET.NAME == 'CIFAR_10':
-        testset = datasets.CIFAR10(root=cfg.test_root, train=False, download=True, transform=transform_test)
-    elif cfg.DATASET.NAME == 'MNIST':
-        testset = datasets.MNIST(root=cfg.data_root, train=False, download=True, transform=transform_test)
-    else:
-        raise NotImplementedError(f'Dataset {cfg.DATASET.NAME} not supported')
-    test_loader = DataLoader(testset, batch_size=cfg.test_batch_size, shuffle=False, **kwargs)
+    train_loader, val_loader, test_loader = get_data()
 
     model = make_model(cfg.ARCH)
     model = model.cuda()

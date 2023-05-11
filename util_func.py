@@ -2,7 +2,9 @@ import numpy as np
 import time
 import os
 import torch
-import random 
+from torch.utils.data import random_split
+import random
+import torchvision
 from torchvision import transforms
 
 from utils.config import cfg
@@ -45,27 +47,80 @@ def make_transform(train=True):
         transform_list
     )
 
-""" transform_train = transforms.Compose([
-    transforms.RandomCrop(32, padding=4),
-    transforms.RandomHorizontalFlip(),
-    transforms.ToTensor(),
-])
 
-transform_test = transforms.Compose([
-    transforms.ToTensor(),
-])
+def pcam_getter(*args, train=True, ** kwargs):
+    '''
+    Wrapper function for the PCAM dataset, emulates 
+    behaviour of other dataset getters
+    '''
+    if train:
+        train_split = torchvision.datasets.PCAM(
+            *args, split='train', **kwargs
+        )
+        val_split = torchvision.datasets.PCAM(
+            *args, split='val', **kwargs
+        )
+        dataset = torch.utils.data.ConcatDataset([train_split, val_split])
+    else:
+        dataset = torchvision.datasets.PCAM(
+            *args, split='test', **kwargs
+        )
 
-transform_train_norm = transforms.Compose([
-    transforms.RandomCrop(32, padding=4),
-    transforms.RandomHorizontalFlip(),
-    transforms.ToTensor(),
-    transforms.Normalize(cfg.cifar10_mean, cfg.cifar10_std)
-])
+    return dataset
 
-transform_test_norm = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Normalize(cfg.cifar10_mean, cfg.cifar10_std)
-]) """
+
+def get_data():
+    '''
+    Get a given supported dataset and return both clean and perturbed data
+    samples
+    '''
+
+    if cfg.DATASET.NAME == 'MNIST':
+        getter = torchvision.datasets.MNIST
+    elif cfg.DATASET.NAME == 'EMNIST_BALANCED':
+        getter = lambda *args, **kwargs: torchvision.datasets.EMNIST(
+            *args, split='balanced', **kwargs
+        )
+    elif cfg.DATASET.NAME == 'FASHION_MNIST':
+        getter = torchvision.datasets.FashionMNIST
+    elif cfg.DATASET.NAME == 'CIFAR10':
+        getter = torchvision.datasets.CIFAR10
+    elif cfg.DATASET.NAME == 'CIFAR100':
+        getter = torchvision.datasets.CIFAR100
+    elif cfg.DATASET.NAME == 'PCAM':
+        getter = pcam_getter
+    else:
+        raise NotImplementedError(
+            f'Dataset {cfg.DATASET.NAME} not supported'
+    )
+
+    def dataset_factory(train=True):
+        return getter(
+            root=os.path.join('data'),
+            transform=make_transform(train=train),
+            train=train
+        )
+
+    train_dataset = dataset_factory(train=True)
+    test_dataset = dataset_factory(train=False)
+
+    # Train val split:
+    train_dataset, val_dataset = random_split(train_dataset, [4/5, 1/5])
+
+    # Create PyTorch DataLoaders
+    def dataloader_factory(dataset):
+        return torch.utils.data.DataLoader(
+            dataset, batch_size=cfg.batch_size, shuffle=True,
+            num_workers=8,
+        )
+
+    train_loader = dataloader_factory(train_dataset)
+    val_loader = dataloader_factory(val_dataset)
+    test_loader = dataloader_factory(test_dataset)
+
+    # Return loaders for train, val, test, for clean, pert data
+    return train_loader, val_loader, test_loader
+
 
 def set_seed():
     torch.manual_seed(cfg.seed)

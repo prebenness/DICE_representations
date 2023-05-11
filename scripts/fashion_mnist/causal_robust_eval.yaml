@@ -30,9 +30,14 @@ MODEL:
 ATTACK:
   LOSS_TYPE: untar # choices=['tar', 'untar', 'tar_adap', ...]
   CONFOUNDING_WAY: mc # for ``tar'' loss_type 
-  STEP: 10
+  # Train
+  STEP: 20
   EPSILON: 8.
   ALPHA: 2.
+  # Eval
+  EVAL_STEP: 40
+  EVAL_EPSILON: 8.
+  EVAL_ALPHA: 4.
   GAMMA: 0.5 # for ``tar_adap'' loss_type 
 
 # Training hyperparameters
@@ -52,13 +57,13 @@ TRAIN:
 
 DATASET:
   MODE: clean
-  NAME: 'MNIST'
+  NAME: 'FASHION_MNIST'
   NUM_CLASSES: 10
   SIZE_H: 28
   SIZE_W: 28
   NUM_CHANNEL: 1
   NORM: False
 
-EVAL: False         # Enable during inference
-REPR: True          # Compute representations - requires pre-trained model
+EVAL: True         # Enable during inference
+REPR: False        # Compute representations - requires pre-trained model
 PRETRAINED_PATH: output/2023-02-02_15-27-38/mnist_causal_adv_on_ResNet18_reg_4.0_untar_eps_8.0_alp_2.0_s_10/params/epoch1.pt

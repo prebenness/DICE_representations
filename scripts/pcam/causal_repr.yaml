@@ -4,7 +4,7 @@ batch_size: 128
 test_batch_size: 128
 
 # Hyperparameters for training
-epochs: 110           # Originally 110
+epochs: 150           # Originally 110
 opt_level: O1
 lr: 0.1
 lr_mode: 'piecewise'
@@ -52,11 +52,11 @@ TRAIN:
 
 DATASET:
   MODE: clean
-  NAME: 'MNIST'
-  NUM_CLASSES: 10
-  SIZE_H: 28
-  SIZE_W: 28
-  NUM_CHANNEL: 1
+  NAME: 'PCAM'
+  NUM_CLASSES: 2
+  SIZE_H: 96
+  SIZE_W: 96
+  NUM_CHANNEL: 3
   NORM: False
 
 EVAL: False         # Enable during inference
