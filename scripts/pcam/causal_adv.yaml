@@ -4,11 +4,13 @@ batch_size: 128
 test_batch_size: 128
 
 # Hyperparameters for training
-epochs: 110           # Originally 110
+epochs: 150           # Originally 110
 opt_level: O1
 lr: 0.1
 lr_mode: 'piecewise'
 weight_decay: 0.0005
+SAVE_EPOCH: 10        # When to start checkpointing model 
+SAVE_FREQ: 5          # How often to checkpoint model
 
 # Model and backbone
 ARCH: causal_v0
@@ -42,23 +44,22 @@ TRAIN:
   LR_STEP: 
     - 100
     - 105
-  CAUSAL_REG : 4.
+  CAUSAL_REG: 4.
   CAUSAL_SURRO: adv
   GRAD_PRE_WAY: std
   GRAD_MASK_WAY: hard
   GRAD_POOLING: max
   GRAD_ATT_R: 0.6
-  BNeval: False     # Disable during inference
+  BNeval: True    # Disable during inference
 
 DATASET:
   MODE: clean
-  NAME: 'MNIST'
-  NUM_CLASSES: 10
-  SIZE_H: 28
-  SIZE_W: 28
-  NUM_CHANNEL: 1
+  NAME: 'PCAM'
+  NUM_CLASSES: 2
+  SIZE_H: 96
+  SIZE_W: 96
+  NUM_CHANNEL: 3
   NORM: False
 
-EVAL: False         # Enable during inference
-REPR: True          # Compute representations - requires pre-trained model
-PRETRAINED_PATH: output/2023-02-02_15-27-38/mnist_causal_adv_on_ResNet18_reg_4.0_untar_eps_8.0_alp_2.0_s_10/params/epoch1.pt
+EVAL: False       # Enable during inference
+REPR: False       # Compute representations - requires pre-trained model
